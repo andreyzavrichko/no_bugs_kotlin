@@ -2,8 +2,11 @@ package ph.salmon.test.requests
 
 import io.qameta.allure.Step
 import io.restassured.RestAssured.given
+import io.restassured.response.ValidatableResponse
 import io.restassured.specification.RequestSpecification
 import org.apache.http.HttpStatus
+import org.apache.http.HttpStatus.SC_NOT_FOUND
+import ph.salmon.test.config.ApiEndpoints
 import ph.salmon.test.models.Post
 
 class PostService(val reqSpec: RequestSpecification) : CrudInterface<Post> {
@@ -15,7 +18,7 @@ class PostService(val reqSpec: RequestSpecification) : CrudInterface<Post> {
         val createdPost = given()
             .spec(reqSpec)
             .body(item)
-            .post(POSTS_URL)
+            .post(ApiEndpoints.POSTS)
             .then()
             .assertThat()
             .statusCode(HttpStatus.SC_CREATED)
@@ -29,18 +32,29 @@ class PostService(val reqSpec: RequestSpecification) : CrudInterface<Post> {
     override fun read(id: Int): Post {
         return given()
             .spec(reqSpec)
-            .get("$POSTS_URL/$id")
+            .get("${ApiEndpoints.POSTS}/$id")
             .then()
             .extract()
             .body()
             .`as`(Post::class.java)
     }
 
+    @Step("Get post not found")
+    fun readNotFound(id: Int): ValidatableResponse? {
+        return given()
+            .spec(reqSpec)
+            .get("${ApiEndpoints.POSTS}/$id")
+            .then()
+            .assertThat()
+            .statusCode(SC_NOT_FOUND)
+
+    }
+
     @Step("Delete post")
     override fun delete(id: Int): String {
         return given()
             .spec(reqSpec)
-            .delete("$POSTS_URL/$id")
+            .delete("${ApiEndpoints.POSTS}/$id")
             .then()
             .assertThat()
             .statusCode(HttpStatus.SC_OK)
@@ -53,15 +67,11 @@ class PostService(val reqSpec: RequestSpecification) : CrudInterface<Post> {
         return given()
             .spec(reqSpec)
             .body(item)
-            .put("$POSTS_URL/$id")
+            .put("${ApiEndpoints.POSTS}/$id")
             .then()
             .assertThat()
             .statusCode(HttpStatus.SC_OK)
             .extract().body()
             .`as`(Post::class.java)
-    }
-
-    companion object {
-        const val POSTS_URL = "/posts"
     }
 }
