@@ -5,7 +5,7 @@ import io.qameta.allure.Issue
 import org.junit.jupiter.api.*
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import ph.salmon.test.asserts.PostAssert.Companion.assertThatPost
+import ph.salmon.test.asserts.ModelAssert.Companion.assertThatModel
 import ph.salmon.test.generators.TestDataGenerator.generate
 import ph.salmon.test.models.Post
 import ph.salmon.test.requests.PostService
@@ -38,7 +38,7 @@ class PostsTest : BaseApiTest() {
     fun `should return correct post by id`() {
         val actualResponse = postService.read(expectedPost.id)
 
-        assertThatPost(actualResponse).hasSameFieldsAs(expectedPost)
+        assertThatModel(actualResponse, Post::class.java).hasSameFieldsAs(expectedPost)
     }
 
     @Test
@@ -47,7 +47,7 @@ class PostsTest : BaseApiTest() {
     @DisplayName("Пользователь может успешно создать новый пост")
     fun `should create a new post successfully`() {
         val actualResponse = postService.create(expectedPost)
-        assertThatPost(actualResponse).hasSameFieldsAs(expectedPost)
+        assertThatModel(actualResponse, Post::class.java).hasSameFieldsAs(expectedPost)
     }
 
     @Test
@@ -56,7 +56,7 @@ class PostsTest : BaseApiTest() {
     @DisplayName("Пользователь может успешно обновить пост")
     fun `should update a post successfully`() {
         val actualResponse = postService.update(expectedPost.id, expectedPost)
-        assertThatPost(actualResponse).hasSameFieldsAs(expectedPost)
+        assertThatModel(actualResponse, Post::class.java).hasSameFieldsAs(expectedPost)
     }
 
 
@@ -114,7 +114,8 @@ class PostsTest : BaseApiTest() {
         val post = generate(Post::class.java, mapOf("title" to title))
         val createdPost = postService.create(post)
 
-        assertThatPost(createdPost).hasSameFieldsAs(expectedPost)
+        val expectedPost = post.copy(id = 101)
+        assertThatModel(createdPost, Post::class.java).hasSameFieldsAs(expectedPost)
     }
 
     companion object {
